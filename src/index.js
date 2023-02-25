@@ -20,11 +20,11 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // Get a list of cities from your database
-async function getCities(db) {
+async function getAlerts() {
     const citiesCol = collection(db, 'teb');
     const citySnapshot = await getDocs(citiesCol);
     const cityList = citySnapshot.docs.map(doc => doc.data());
-    console.log(cityList);
+    //console.log(cityList);
     return cityList;
 }
 
@@ -37,11 +37,35 @@ function initMap() {
         zoom: 12,
     });
 
-    new google.maps.Marker({
-        position: { lat: 44.475252, lng: 26.091441 },
-        map,
-        title: "Hello World!",
-    });
+    const alertsList = getAlerts();
+
+    alertsList.then(function (value) {
+        //console.log("value : " + value);
+        value.forEach(
+            element => {
+                element.termoModel.forEach(termoModel => {
+                    // console.log(termoModel);
+                    var googleGeocode = termoModel.geocode.geocode[0];
+                    //console.log(googleGeocode);
+                    if (googleGeocode !== undefined) {
+                        console.log(googleGeocode.latitude + " " + googleGeocode.longitude);
+                        new google.maps.Marker({
+                            position: { lat: googleGeocode.latitude, lng: googleGeocode.longitude },
+                            map,
+                            title: "Bloc " + termoModel.flat,
+                        });
+                    }
+
+                })
+            }
+        )
+    },
+        function (error) {
+            console.log("error");
+        }
+    )
+
+
 }
 
 window.initMap = initMap;
