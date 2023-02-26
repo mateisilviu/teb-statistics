@@ -109,9 +109,9 @@ async function getTEBHTML() {
                 await extractSector(td);
             } break;
             case 1: {
-                if (sector == 1) {
-                    await extractBlocuri(td);
-                }
+                //  if (sector == 1) {
+                await extractBlocuri(td);
+                //   }
             } break;
             case 2: {
                 issueType = await extractTypeIssue(td);

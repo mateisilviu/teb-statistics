@@ -41,24 +41,35 @@ function initMap() {
 
     alertsList.then(function (value) {
         //console.log("value : " + value);
+        console.log("value.length" + value.length);
         value.forEach(
             element => {
+                console.log("element.termoModel.length" + element.termoModel.length);
                 element.termoModel.forEach(termoModel => {
                     // console.log(termoModel);
-                    var googleGeocode = termoModel.geocode.geocode[0];
+                    var googleGeocode = termoModel.geocode[0];
                     //console.log(googleGeocode);
                     if (googleGeocode !== undefined) {
                         console.log(googleGeocode.latitude + " " + googleGeocode.longitude);
-                        new google.maps.Marker({
+                        const marker = new google.maps.Marker({
                             position: { lat: googleGeocode.latitude, lng: googleGeocode.longitude },
                             map,
-                            title: "Bloc " + termoModel.flat,
+                            label: "Bloc " + termoModel.flat,
+                            icon: getIconTypeBasedOnIssueType(termoModel.alertType)
+                        });
+                        const infowindow = getInfoWindow(termoModel);
+                        marker.addListener("click", () => {
+                            infowindow.open({
+                                anchor: marker,
+                                map,
+                            });
                         });
                     }
 
                 })
             }
         )
+
     },
         function (error) {
             console.log("error");
@@ -66,6 +77,25 @@ function initMap() {
     )
 
 
+}
+
+function getInfoWindow(termoModel) {
+    var alertType = termoModel.alertType.replace("ACC", "Apă Caldă de Consum");
+    alertType = termoModel.alertType.replace("INC", "Încălzire");
+    const contentInfoWindow = '<div id="infoWindoContent"><h3>' + alertType + '</h3><p>' + termoModel.causeType + '</p><p>' + termoModel.hourDate + '</p></div>';
+    const infowindow = new google.maps.InfoWindow({
+        content: contentInfoWindow,
+    });
+    return infowindow;
+}
+
+function getIconTypeBasedOnIssueType(alertType) {
+    if (alertType.includes("Oprire")) {
+        return "http://maps.gstatic.com/mapfiles/ms2/micons/red.png";
+    }
+    if (alertType.includes("Deficienta")) {
+        return "http://maps.gstatic.com/mapfiles/ms2/micons/yellow.png";
+    }
 }
 
 window.initMap = initMap;
